@@ -1,0 +1,589 @@
+i'm using expo react native and django rest apis and here i have a problem, i need to implement something below;
+1.nina view kwaajili ya kumuwezesha buyer kumake order, ambayo inaonekana kama hivi;
+
+class CollectionCenters(models.Model):
+    CenterID = models.IntegerField(verbose_name="Center ID", blank=True, null=True)
+    
+    CenterName = models.CharField(verbose_name="Center Name",max_length=500, blank=True,null=True)
+
+    Location = models.CharField(max_length=200, verbose_name="Centre Location", blank=True, null=True)
+    WarehouseSize = models.IntegerField(verbose_name="Warehouse Size", blank=True, null=True)
+    
+    Created = models.DateTimeField(auto_now_add=True)
+    Updated = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.CenterName}"
+    
+    class Meta:
+        verbose_name_plural = "Collection Centers"
+
+
+
+#AFTER MAKING ORDER IF YOU WANT TO DELETE A CART ITEMS USE THIS
+class StocksCollectionOrderView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    
+
+    #----------------MAKE ORDER --------------------
+    def post(self, request):
+        user = request.user
+        data = request.data
+        Buyer = request.user.username
+        
+
+        total_price = request.data.get('total_price', 0)  # You may calculate this on the server
+        cart = StocksCollectionCart.objects.filter(user=user, ordered=False).first()
+
+        if not cart:
+            return Response({'error': 'No items in the cart'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        # Create the order
+        # order = StocksCollectionOrder.objects.create(user=user, total_price=total_price, table_number=table.TableNumber)
+        order = StocksCollectionOrder.objects.create(
+            Buyer=Buyer, 
+            user=user, 
+            total_price=total_price
+        )
+        
+        # Assign the first category ID found to the Order CategoryId field
+        # if product_category_ids:
+        #     order.CategoryId = product_category_ids.pop()
+        #     order.save()
+
+        total_cart_items = StocksCollectionCartItems.objects.filter(user=user)
+
+        total_price = 0
+        for items in total_cart_items:
+            total_price += items.price
+        order.total_price = total_price
+        order.save()
+
+        # table.TableStatus = False
+        # table.save()
+
+        # Retrieve cart items and add them to the order
+        cart_items = StocksCollectionCartItems.objects.filter(user=user, cart=cart)
+        for cart_item in cart_items:
+            StocksCollectionOrderItems.objects.create(
+                user=user,
+                order=order,
+                product=cart_item.product,
+                
+                price=cart_item.price,
+                quantity=cart_item.quantity,
+
+                #room=room,
+                # table=table,
+                # Customer=Customer
+                # CustomerFullName=cart_item.CustomerFullName,
+                # CustomerAddress=cart_item.CustomerAddress,
+                # PhoneNumber=cart_item.PhoneNumber
+            )
+
+
+
+        # Clear the user's cart
+        cart_items.delete()
+        cart.total_price = 0
+        cart.ordered = True
+        cart.save()
+
+        return Response(StocksCollectionOrderSerializer(order).data, status=status.HTTP_201_CREATED)
+
+below are my models;
+
+class Buyers(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+    ]
+
+    PARTICIPATION_GROUPS_CHOICES = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+    ]
+    full_name = models.CharField(max_length=200,verbose_name="Full Buyer Name", blank=False, null=False)
+    #NidaNo = models.IntegerField(verbose_name="Farmer Nida Number", blank=True, null=True)
+    #Education = models.ForeignKey(EducationLevels,verbose_name="Education Level", on_delete=models.PROTECT, blank=True,null=True)
+    #FarmerSize = models.FloatField(verbose_name="Farmer Size", blank=True,null=True)
+
+    #date_of_birth = models.DateField()
+    country = models.CharField(max_length=100,verbose_name="Country", blank=True, null=True)
+    region = models.CharField(max_length=100, verbose_name="Region", blank=True, null=True)
+    district = models.CharField(max_length=100, verbose_name="District", blank=True, null=True)
+    ward = models.CharField(max_length=100, verbose_name="Ward", blank=True, null=True)
+    #gender = models.CharField(max_length=6, choices=GENDER_CHOICES, verbose_name="Gender", blank=True, null=True)
+    #PARTICIPATION_GROUPS = models.CharField(max_length=3, choices=PARTICIPATION_GROUPS_CHOICES, verbose_name="Participation in Corporate Groups", blank=True, null=True)
+
+    #FarmersOwnership = models.ForeignKey(FarmersOwnershipTypes,verbose_name="Farmers Ownership Types", on_delete=models.PROTECT, blank=True,null=True)
+
+    MobileNumber = models.IntegerField(verbose_name="Mobile Number", blank=True, null=True)
+    #TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
+
+    Username = models.CharField(max_length=200,verbose_name="Username", blank=True, null=True)
+    Email = models.CharField(max_length=200,verbose_name="Email", blank=True, null=True)
+
+    Location = models.CharField(max_length=100, verbose_name="Physical Location", blank=True, null=True)
+
+    #Crops = models.ManyToManyField(CultivatedCrops, verbose_name="Cultivated Crops", blank=True)
+
+    Created = models.DateTimeField(auto_now_add=True)
+    Updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.full_name
+
+    class Meta:
+        verbose_name_plural = "Buyers"
+
+
+
+
+
+
+class Transporters(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+    ]
+
+    TYPE_CHOICES = [
+        ('company', 'Company'),
+        ('individual', 'Individual'),
+    ]
+    full_name = models.CharField(max_length=200,verbose_name="Full Transporter Name", blank=False, null=False)
+    RegNo_TinNo = models.IntegerField(verbose_name="Registration/Tin No", blank=True, null=True)
+    #Education = models.ForeignKey(EducationLevels,verbose_name="Education Level", on_delete=models.PROTECT, blank=True,null=True)
+    #FarmerSize = models.FloatField(verbose_name="Farmer Size", blank=True,null=True)
+
+    #date_of_birth = models.DateField()
+    country = models.CharField(max_length=100,verbose_name="Country", blank=True, null=True)
+    region = models.CharField(max_length=100, verbose_name="Region", blank=True, null=True)
+    district = models.CharField(max_length=100, verbose_name="District", blank=True, null=True)
+    ward = models.CharField(max_length=100, verbose_name="Ward", blank=True, null=True)
+    #gender = models.CharField(max_length=6, choices=GENDER_CHOICES, verbose_name="Gender", blank=True, null=True)
+    Type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name="Type", blank=True, null=True)
+
+    #FarmersOwnership = models.ForeignKey(FarmersOwnershipTypes,verbose_name="Farmers Ownership Types", on_delete=models.PROTECT, blank=True,null=True)
+
+    MobileNumber = models.IntegerField(verbose_name="Mobile Number", blank=True, null=True)
+    #TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
+    ContactPerson = models.CharField(max_length=200,verbose_name="Name Of Contact Person", blank=True, null=True)
+    Username = models.CharField(max_length=200,verbose_name="Username", blank=True, null=True)
+    Email = models.CharField(max_length=200,verbose_name="Email", blank=True, null=True)
+
+    Location = models.CharField(max_length=200, verbose_name="Office Location", blank=True, null=True)
+
+    #Crops = models.ManyToManyField(CultivatedCrops, verbose_name="Cultivated Crops", blank=True)
+
+    Created = models.DateTimeField(auto_now_add=True)
+    Updated = models.DateTimeField(auto_now=True)
+
+
+    VehicleNo = models.CharField(max_length=200, verbose_name="Vehicle Number", blank=True, null=True)
+    VehicleType = models.CharField(max_length=200, verbose_name="Vehicle Type", blank=True, null=True)
+    Driver = models.CharField(max_length=200, verbose_name="Driver Name", blank=True, null=True)
+    DriverLicenceNo = models.CharField(max_length=200, verbose_name="Driver Licence Number", blank=True, null=True)
+    FeePerKm = models.FloatField(verbose_name="Fee Per Km", blank=True,null=True)
+    RoutesSpecification = models.CharField(max_length=200, verbose_name="Routes Specification", blank=True, null=True)
+    VehicleCapacity = models.CharField(max_length=200, verbose_name="Vehicle Capacity", blank=True, null=True)
+    VehicleStatus = models.CharField(max_length=200, verbose_name="Vehicle Status", blank=True, null=True)
+    AvailabilityStatus = models.CharField(max_length=200, verbose_name="Availability Status", blank=True, null=True)
+    EffectiveDate = models.DateField(verbose_name="Effective Date of Transaction", blank=True,null=True)
+
+    def __str__(self):
+        return self.full_name
+
+    class Meta:
+        verbose_name_plural = "Transporters"
+
+class StocksCollection(models.Model):
+    
+    #---------------AUTOMATIC FIELDS -------------------
+    reg_no= models.CharField(max_length=100000,blank=True,null=True)
+    full_name = models.CharField(max_length=200,verbose_name="Full Farmer Name", blank=True, null=True)
+    #full_name = models.CharField(max_length=200,verbose_name="Full Farmer Name", blank=False, null=False)
+    NidaNo = models.IntegerField(verbose_name="Farmer Nida Number", blank=True, null=True)
+    Education = models.CharField(max_length=100, verbose_name="Education Level", blank=True,null=True)
+    FarmerSize = models.FloatField(verbose_name="Farmer Size", blank=True,null=True)
+
+    date_of_birth = models.DateField(blank=True,null=True)
+    FarmerImage = models.ImageField(verbose_name="Farmer Image", upload_to='media/FarmerImage/',blank=True,null=True)
+    country = models.CharField(max_length=100,verbose_name="Country", blank=True, null=True)
+    region = models.CharField(max_length=100, verbose_name="Region", blank=True, null=True)
+    district = models.CharField(max_length=100, verbose_name="District", blank=True, null=True)
+    ward = models.CharField(max_length=100, verbose_name="Ward", blank=True, null=True)
+    gender = models.CharField(max_length=6, verbose_name="Gender", blank=True, null=True)
+    PARTICIPATION_GROUPS = models.CharField(max_length=3, verbose_name="Participation in Corporate Groups", blank=True, null=True)
+
+    FarmersOwnership = models.CharField(max_length=100, verbose_name="Farmers Ownership Types", blank=True,null=True)
+
+    MobileNumber = models.IntegerField(verbose_name="Mobile Number", blank=True, null=True)
+    TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
+
+    Username = models.CharField(max_length=200,verbose_name="Username", blank=True, null=True)
+    Email = models.CharField(max_length=200,verbose_name="Email", blank=True, null=True)
+
+    #-------------------MWISHO WA AUTOMATIC FIELDS-----------------
+
+    CenterName = models.ForeignKey(CollectionCenters,verbose_name="Collection Point Name", on_delete=models.PROTECT, blank=True,null=True)
+    CropType = models.ForeignKey(CultivatedCrops,verbose_name="Crop Type", on_delete=models.PROTECT, blank=True,null=True)
+
+    
+    CropUnitPrice = models.FloatField(verbose_name="Crop Unit Price - Debe 1", blank=True, null=True)
+    StorageChargesPerUnit = models.FloatField(verbose_name="Storage Charges Per Unit - Debe 1", blank=True, null=True)
+
+    
+    Quantity = models.IntegerField(verbose_name="Amount at the Collection Centre - Debe", blank=True, null=True)
+
+    TotalPriceForAllDebe = models.FloatField(verbose_name="Total Price - All Debe", blank=True, null=True)
+    TotalStorageChargesForAllDebe = models.FloatField(verbose_name="Total Storage Charges - All Debe", blank=True, null=True)
+
+
+    InitialQuantity = models.FloatField(verbose_name="Initial Amount at the Collection Centre - Debe", blank=True, null=True)
+    
+    #Location = models.CharField(max_length=200, verbose_name="Centre Location", blank=True, null=True)
+    CropImage = models.ImageField(verbose_name="Crop Image", upload_to='media/CropsImages/',blank=True,null=True)
+    #Crops = models.ManyToManyField(CultivatedCrops, verbose_name="Cultivated Crops", blank=True)
+
+    Created_By = models.CharField(max_length=200,verbose_name="Imewekwa Na", blank=True, null=True)
+
+    
+    Is_Ended = models.BooleanField(default=False, blank=True, null=True)
+
+    Created = models.DateTimeField(auto_now_add=True)
+    Updated = models.DateTimeField(auto_now=True)
+    ReceiptDate = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.CropType.Crops
+
+    class Meta:
+        verbose_name_plural = "Stocks Collection"
+
+class StocksCollectionOrder(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True, null=True)
+    cart = models.ForeignKey(StocksCollectionCart, on_delete=models.CASCADE, blank=True, null=True)
+    # orderItems = models.ManyToManyField('StocksCollectionOrderItems')
+    total_price = models.FloatField(verbose_name="Total Price")
+
+    CategoryId = models.IntegerField(verbose_name="Category ID",blank=True,null=True)
+    closed_order_state = models.BooleanField(verbose_name="Is Order Closed ?", default=False,blank=True,null=True)
+    
+    Buyer = models.CharField(max_length=500, verbose_name="Buyer Name",blank=True,null=True)
+    BuyerCountry = models.CharField(max_length=100,verbose_name="Buyer Country", blank=True, null=True)
+    BuyerRegion = models.CharField(max_length=100, verbose_name="Buyer Region", blank=True, null=True)
+    BuyerDistrict = models.CharField(max_length=100, verbose_name="Buyer District", blank=True, null=True)
+    BuyerWard = models.CharField(max_length=100, verbose_name="Buyer Ward", blank=True, null=True)
+    BuyerMobileNumber = models.IntegerField(verbose_name="Buyer Mobile Number", blank=True, null=True)
+    #TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
+
+    BuyerUsername = models.CharField(max_length=200,verbose_name="Buyer Username", blank=True, null=True)
+    BuyerEmail = models.CharField(max_length=200,verbose_name="Buyer Email", blank=True, null=True)
+
+    BuyerLocation = models.CharField(max_length=100, verbose_name="Buyer Physical Location", blank=True, null=True)
+
+    
+    FarmerFullName = models.CharField(max_length=500, verbose_name="Farmer Name",blank=True,null=True)
+    FarmerRegNo = models.CharField(max_length=500, verbose_name="Farmer Reg No",blank=True,null=True)
+    FarmerCountry = models.CharField(max_length=100,verbose_name="Farmer Country", blank=True, null=True)
+    FarmerRegion = models.CharField(max_length=100, verbose_name="Farmer Region", blank=True, null=True)
+    FarmerDistrict = models.CharField(max_length=100, verbose_name="Farmer District", blank=True, null=True)
+    FarmerWard = models.CharField(max_length=100, verbose_name="Farmer Ward", blank=True, null=True)
+    FarmerGender = models.CharField(max_length=6, verbose_name="Farmer Gender", blank=True, null=True)
+    FarmerMobileNumber = models.IntegerField(verbose_name="Farmer Mobile Number", blank=True, null=True)
+    FarmerTelNumber = models.IntegerField(verbose_name="Farmer Telephone Number", blank=True, null=True)
+    FarmerUsername = models.CharField(max_length=200,verbose_name="Farmer Username", blank=True, null=True)
+    FarmerEmail = models.CharField(max_length=200,verbose_name="Farmer Email", blank=True, null=True)
+
+    StocksCollectionCenterName = models.CharField(max_length=500, verbose_name="Stocks Collection Centre Name",blank=True,null=True)
+    StocksCollectionCenterLocation = models.CharField(max_length=500, verbose_name="Stocks Collection Centre Location",blank=True,null=True)
+
+    # table_number = models.CharField(max_length=500, verbose_name="Table Number",blank=True,null=True)
+
+    order_status = models.BooleanField(verbose_name="Status", default=False,blank=True,null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "StocksCollection Orders"
+
+    def __str__(self):
+        return f"Order {self.id} by {self.user.username}"
+
+
+class StocksCollectionOrderItems(models.Model):
+    order = models.ForeignKey(StocksCollectionOrder, on_delete=models.CASCADE) 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey(StocksCollection,on_delete=models.CASCADE)
+    price = models.FloatField(default=0)
+    # Customer = models.ForeignKey(StocksCollectionCustomers,on_delete=models.CASCADE,blank=True,null=True)
+    order_status = models.BooleanField(verbose_name="Status", default=False,blank=True,null=True)
+    quantity = models.IntegerField(default=1)
+    # table = models.ForeignKey(StocksCollectionTables,on_delete=models.CASCADE,blank=True,null=True)
+    Created = models.DateTimeField(auto_now_add=True)
+    Updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "StocksCollection Orders Items"
+
+    def __str__(self):
+        return f" {self.product.CropType.Crops} " 
+
+
+hizo ndo codes zangu, sasa nilikuwa nataka user akishachagua bidhaa then akamake order basi uende kwenye model ya StocksCollectionOrders ukajaze hizi field automatically;
+field ya Buyer iwe ndo jina la yule user aliyerequest kumake order.
+field ya BuyerCountry iende kwenye model ya Buyers ikafilte huyo user aliyemake order pamoja na taarifa zake zingine then ikakopi kwenye hii model ya StocksCollectionOrders kwenye field zote zenye neno Buyer pamoja na iyo ya BuyerCountry.
+field ya FarmerFullName iende kwenye model ya StocksCollection ambayo inahifadhi bidhaa zote ikakopi field ya full_name na field zingine zenye neno Farmer ikakopi kwenye model hiihii ya StocksCollection corresponding fields.
+pia fields za StocksCollectionCenterName na StocksCollectionCenterLocation zikakopi pia kwenye model hiihii ya StocksCollection kwa kubase kwenye field ya 'CenterName'
+
+
+then mwisho nataka baada ya order kuwa successfully place nenda kwenye model ya Transporters then loop all transporters then tuma email kwa hao transporters wote, ikisema 'Order imewekwa kikamilifu tarehe fulani muda saa fulani na Buyer fulani anayeishi sehemu fulani na bidhaa zipo collection centre fulani iliyopo mahali fulani. Bidhaa alizoorder ni hizi hapa:'
+
+so hilo ndo tatizo langu naomba a full working codes based on my explanations.
+
+my expo react native codes are;
+
+
+
+const [modalVisible, setModalVisible] = useState(false);
+const [cart, setCart] = useState([]);
+const [userToken, setUserToken] = useState('');
+const [shouldReload, setShouldReload] = useState(false);
+const [userData, setUserData] = useState({});
+
+const [selectedProduct, setSelectedProduct] = useState(null);
+const [quantity, setQuantity] = useState('');
+const [isPending, setPending] = useState(true);
+
+
+useEffect(() => {
+
+   
+    checkLoggedIn();
+    // Fetch cart items only if the user is authenticated
+    if (userToken) {
+      fetchCartItems();
+    }
+
+  }, [userToken]);
+
+const checkLoggedIn = async () => {
+const token = await AsyncStorage.getItem('userToken');
+setUserToken(token);
+ 
+};
+
+
+
+
+const fetchCartItems = async () => {
+
+  setPending(true);
+  try {
+    const response = await axios.get(
+      EndPoint + '/StocksCollectionCart/',
+      {
+        headers: {
+          Authorization: `Token ${userToken}`,
+        },
+      }
+    );
+
+    // Check if the response data is an empty array (cart is empty)
+    if (Array.isArray(response.data) && response.data.length === 0) {
+      // Handle the case when the cart is empty here
+      setPending(false);
+      setCart([]); // Set cart to an empty array
+    } else {
+      // Cart is not empty, update the cart state with the data
+      setPending(false);
+      setCart(response.data);
+       
+      // Set isOrderButtonVisible to true after adding an item to the cart
+     // Check if the displayedItemsCount is greater than 1 and show the order button
+   
+     // setIsOrderButtonVisible(true);
+    
+
+
+    }
+  } catch (error) {
+    //console.error('Error fetching cart items:', error);
+    setPending(false);
+    showAlertFunction("Error fetching cart items");
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+const removeCartItem = (cartId) => {
+  setPending(true);
+
+   //navigation.replace('Restaurant Products', { id });
+  // Make an API request to delete the item from the cart
+  const apiUrl = `${EndPoint}/StocksCollectionDeleteCartItem/?cartId=${cartId}`;
+  // console.log("URL",apiUrl);
+  
+  axios
+    .delete(apiUrl, {
+      headers: {
+        Authorization: `Token ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => {
+      if (response.status === 204) {
+        // Item removed successfully, update the cartItems state
+        setCart(cart.filter((item) => item.id !== cartId));
+
+        setPending(false);
+         //setIsOrderButtonVisible(false);
+         //Alert.alert('item is removed successfully from your cart');
+         showAlertFunction("item is removed successfully from your cart");
+
+         // navigation.replace('Restaurant Products');  
+
+           // Decrement the displayedItemsCount
+     // setDisplayedItemsCount((prevCount) => prevCount - 1);
+
+      // Check if the displayedItemsCount is less than or equal to 1 and hide the order button
+       // Check if the displayedItemsCount is less than or equal to 1 and hide the order button
+    //     if (displayedItemsCount < 1) {
+    //   setIsOrderButtonVisible(false);
+    // }
+
+
+      } 
+      else {
+        setPending(false);
+        // Handle the error if the item couldn't be removed
+        
+        //Alert.alert('Error', 'Failed to remove item from cart');
+        showAlertFunction("Failed to remove item from a cart");
+      }
+    })
+    .catch((error) => {
+     setPending(false);
+      // Handle the error here, for example, show a user-friendly error message
+      //Alert.alert('Error', 'Failed to remove item from cart');
+      showAlertFunction("Failed to remove item from cart");
+    });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const formatToThreeDigits = (number) => {
+  if (number !== null) {
+    return number.toLocaleString('en-US', {
+      minimumFractionDigits: 0, // Ensure two decimal places
+      maximumFractionDigits: 2, // Limit to two decimal places
+      minimumIntegerDigits: 1, // Ensure at least one integer digit
+    });
+  }
+  return null;
+};
+
+
+const calculateTotalPrice = () => {
+  let total = 0;
+  cart.forEach((item) => {
+    total += item.price;
+  });
+  return total;
+};
+
+const totalCartPrice = calculateTotalPrice();
+
+
+
+
+
+
+
+
+
+
+const makeOrder = async () => {
+
+ setPending(true);
+  //navigation.replace('Restaurant Products');
+  //call the print Receipt function
+    // navigation.replace('Restaurant Products', { id });
+ 
+  //setIsOrderButtonVisible(false);
+  try {
+    const response = await axios.post(
+      EndPoint + '/StocksCollectionOrder/',
+      { 
+        total_price: totalCartPrice,
+        //table: selectedTable, // Include the selected table
+        // CustomerFullName: CustomerFullName,
+        // PhoneNumber: PhoneNumber,
+        // CustomerAddress: CustomerAddress,
+        //room: selectedRoom,
+        //Customer: selectedCustomer,
+         },
+
+      {
+        headers: {
+          Authorization: `Token ${userToken}`,
+        },
+      }
+    );
+    
+
+  //setModalVisibleMakeOrder(false);
+    // Clear the cart items from the local state
+    setCart([]);
+
+    // Set isOrderPlaced to true to hide the "Make Order" button and total price text
+     // Set isOrderButtonVisible to false after placing the order
+    
+    //print();
+     //printToFile();
+
+    // After a successful order, update your UI or show a confirmation message
+    setPending(false);
+    //Alert.alert('Success', 'Order placed successfully!');
+    showAlertFunction("Order placed successfully!");
+
+
+    // Optionally, you can navigate to a screen to display the PDF or HTML table.
+    // For example, you can set a state variable to control the visibility of a modal.
+    //setModalVisibleReceipt(true);
+
+
+  } catch (error) {
+    setPending(false);
+    //console.error('Error creating order:', error);
+    showAlertFunction("Error creating order!");
+
+  }
+};
+

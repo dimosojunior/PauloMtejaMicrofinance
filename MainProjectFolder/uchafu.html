@@ -1,0 +1,364 @@
+https://cloud.digitalocean.com/projects?i=e75dae
+
+https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-16-04
+
+137.184.204.91
+
+1. adduser dimoso
+2. usermod -aG sudo dimoso
+3. sudo apt-get install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx
+4. sudo -u postgres psql
+
+create user mfugajismart;
+create database mfugajismartdb;
+alter role mfugajismart with password 'Dimoso@9898';
+grant all previleges on database mfugajismartdb to mfugajismart;
+alter database mfugajismartdb owner to mfugajismart;
+
+
+ALTER Role mfugajismart SET client_encoding TO 'utf8';
+ALTER ROLE mfugajismart SET default_transaction_isolation TO 'read committed';
+ALTER ROLE mfugajismart SET timezone TO 'UTC';
+
+5. \q
+
+ALLOWED_HOSTS = ['localhost','127.0.0.1','137.184.204.91']
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mfugajismartdb',
+        'USER':'mfugajismart',
+        'PASSWORD':'Dimoso@9898',
+        'HOST':'localhost',
+        'PORT':'',
+    }
+}
+
+
+6. su dimoso
+7. cd /home/dimoso
+8. git clone https://github.com/dimosojunior/mfugajismartDO.git
+9. ls
+10. pwd
+11. cd mfugajismartDO
+12. ls until manage.py
+
+#--------To create virtual env go back to the root user
+13. su root
+14. enter password when you have created a droplets in digital ocean
+15. cd
+16. apt-get install python3-virtualenv
+17. su dimoso
+18. pwd
+19. cd /home/dimoso
+20. cd until folder contains manage.py
+
+21. virtualenv venv
+22. source venv/bin/activate
+23. ls until folder contains manage.py
+
+#-------------install all packages----------
+24. pip install -r requirements.txt
+25. python manage.py makemigrations
+
+
+#-------after making migrations if there is an error 'No module called pkg_resources', run these two commands;
+
+-pip install --upgrade setuptools
+-pip install --upgrade distribute 
+
+26. python manage.py migrate
+27. python manage.py collectstatic
+28. python manage.py createsuperuser
+
+#-----------TESTING APP LOCALLY
+29. sudo ufw allow 8000
+30. python manage.py runserver 0.0.0.0:8000
+
+#------paste on the browser--
+http://137.184.204.91:8000/MfugajiSmart/
+
+
+NOTE: kama kuna tatizo codes zako, fanya mabadiliko push github tena.
+-git add .
+-git commit -m 'updated'
+-git push -u origin main
+
+#--------ukisha push nenda tena kwenye terminal kwenye same path, andika
+
+- git pull
+- python manage.py makemigrations
+- python manage.py migrate
+#--unaweza kucreate super user
+
+
+
+
+
+
+
+
+#------------TO allow server to run a project using gunicorn and nginix
+
+# run control C to break up the server
+
+#--kama imetoka sehemu ulipokuwa ili kurudi tena run
+-su dimoso
+-cd /home/dimoso/github repository name until folder contains manage.py
+-source venv/bin/activate
+
+#------Then endelea-----
+
+-ls
+
+#run command below within the folder contains manage.py file
+31. gunicorn --bind 0.0.0.0:8000 Project.wsgi
+   #Project - name of my project
+
+#------------TEST AGAIN IF SERVER IS RUNNING USING GUNICORN----
+
+
+#-------------TO CONTINUE----
+-Control C
+32. deactivate
+
+33. sudo nano /etc/systemd/system/gunicorn.service
+
+#---------Paste this--------
+
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=dimoso
+Group=www-data
+WorkingDirectory=/home/dimoso/mfugajismartDO/MainProjectFolder
+ExecStart=/home/dimoso/mfugajismartDO/MainProjectFolder/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/dimoso/Project.sock Project.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+#----------Then
+-Control S to save
+-Control X to exit
+
+#---To edit again run command no 33. then Contro \, then Control M
+#--to delete sock file run;
+-rm -f Project.sock
+
+
+#---ukifanya changes zozote kwenye hilo file run hiz commands;
+-sudo systemctl daemon-reload
+-sudo systemctl restart gunicorn
+
+
+
+34. sudo systemctl start gunicorn
+35. sudo systemctl enable gunicorn
+36. sudo systemctl status gunicorn
+
+- Control C
+
+#------------NOW check the sock file
+-cd ..
+-ls
+
+
+
+#----------------NO configure Nginx-----------
+
+#weka folder moja tu ndani ya sites-available, ukiweka lingine utapata warning
+
+37. sudo nano /etc/nginx/sites-available/mfugajismartDO
+
+
+
+#------------Paste these;
+
+
+server {
+    listen 80;
+    server_name 137.184.204.91;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/dimoso/mfugajismartDO/MainProjectFolder/MyTemplatesApp;
+    }
+
+    location /media/ {
+        root /home/dimoso/mfugajismartDO/MainProjectFolder;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/dimoso/Project.sock;
+    }
+}
+
+
+38. sudo ln -s /etc/nginx/sites-available/mfugajismartDO /etc/nginx/sites-enabled
+
+39. sudo nginx -t
+
+#--------command to run the server--------
+40. sudo systemctl restart nginx
+
+41. sudo ufw delete allow 8000
+42. sudo tail -F /var/log/nginx/error.log
+
+#------------Kama kuna error run command 43 then restart nginx again by running command 44
+
+43. chmod o+rx /home/dimoso
+
+44.sudo systemctl restart nginx
+
+
+
+
+#-----------------------------------------------
+
+LINK TO MY DIGITAL OCEAN
+
+https://cloud.digitalocean.com/projects/3fd82d78-2569-4325-a22e-78bcf41158a5/resources?dropletIsCreating=true&i=e75dae
+
+
+LINK FOR COMMANDS
+
+https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-16-04
+
+
+NAMECHEAP LINK
+
+https://www.namecheap.com/?clickID=ROFV41y3CxyKRGbQPV3Ne118UkC3qeXLwStJR40&irgwc=1&utm_source=IR&utm_medium=Affiliate&utm_campaign=479450&affnetwork=ir&ref=ir
+
+username : NemoSwalee
+First Name : Nemo
+Last Name : Swalee
+Password: Dimoso@9898
+Email: juniordimoso8@gmail.com
+
+MY DOMAIN
+mfugajismart.net
+
+#----MY GITHUB FOLDER FOR MFUGAJI SMART------------
+-mfugajismartDO/MainProjectFolder/
+
+
+#-----------DIGITAL OCEAN PASSWORD-------------
+dimoSo@9898Junior
+
+
+
+
+
+#-------------------------NOTES MUHIMU ZA KUFANYA MABADILIKO YA PROJECT YAKO ILIYOPO GITHUB-------------------------------
+
+-Baada ya kufanya mabadiliko na kupush project yako github
+-write; git pull in digital ocean
+#hiyo command unaandika sehemu yeyote ndani ya folder lako lililopo github,
+unaweza kuactivate virtualenv au usiactivate yote sawa, ila kama umeadd new package ni vyema ukaactivate virtual env then ukainstall hiyo package then 
+ukamake migrations then migrate.
+
+#-----------Baada ya hapo hakikisha unarun hizi command mbili kwa pamoja;
+-sudo systemctl restart gunicorn
+-sudo systemctl restart nginx
+
+
+
+
+
+
+
+
+
+
+
+
+
+#--------------------------------------
+#----make sure your terminal path is like this;
+-dimoso@mfugajismart:/$ 
+
+#---then write all commands below;
+
+-sudo apt install snapd
+-sudo snap install core
+-sudo snap refresh core
+-sudo snap install --classic certbot
+-sudo certbot --nginx
+-sudo certbot renew --dry-run
+-sudo ufw allow 'Nginx Full'
+-sudo ufw enable, then say yes
+-sudo ufw status
+-sudo systemctl restart gunicorn
+-sudo systemctl restart nginx
+
+#--------make sure nginx file limekuwa updated kurun https, huwa inakuwa updated automatically.
+
+
+
+
+
+
+
+
+
+
+
+#-----------------ERRORS----------------
+
+1. SSH CONNECTION LOST
+
+-ingia kwenye droplet yako digital ocean, then click access, then click Launch Recovery Console. Then
+#type: root and password is password when creating droplet.
+#---------Then type.
+-ufw disable
+
+#-----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ADDMOB INFORMATIONS
+
+https://play.google.com/store/apps/details?id=ttpc.MS
+
+APP ID
+ca-app-pub-4524511699441606~5913413130
+
+INTERRESTITIAL REWARD ID
+ca-app-pub-4524511699441606/7007002951
+
+REWARDED INTEREESTITIAL
+ca-app-pub-4524511699441606/6815431262
+
+
+PROJECT KEYS
+
+ "extra": {
+      "eas": {
+        "projectId": "8c8e8cdf-bdf4-4df2-8993-1f7614db109d"
+      }
+    }
+
+
+
+-https://www.lahoregraphix.com/how-to-send-push-notification-in-react-native-expo-2024/
+
+-https://console.firebase.google.com/u/0/project/mfugaji-smart/overview
+
+
+-https://console.cloud.google.com/apis/library/googlecloudmessaging.googleapis.com?authuser=0&project=mfugaji-smart&hl=en&pli=1

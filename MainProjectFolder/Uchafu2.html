@@ -1,0 +1,177 @@
+yes now in the part of description i have a problem, i need also description to be displayed in a button so create a good attractive button to display a description with an icon left.
+my full codes are;
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import { EndPoint } from '../Constant/links';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons'; // icon nzuri
+import { useNavigation } from '@react-navigation/native';
+
+const MatangazoScreen2 = () => {
+
+const navigation = useNavigation();
+
+  const [queryset2, setQueryset2] = useState([]);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [showContent, setShowContent] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchAdvertisements = async () => {
+    try {
+      const response = await axios.get(EndPoint + `/GetAllSlidingInformationsView/`);
+      console.log("ALL MATANGAZO:", response.data);
+
+      if (response.data.queryset2) {
+        setQueryset2(response.data.queryset2);
+      } else {
+        setQueryset2(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching advertisements:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdvertisements();
+  }, []);
+
+  useEffect(() => {
+    let showTimer;
+    let hideTimer;
+
+    if (queryset2.length > 0) {
+      const startCycle = () => {
+        setShowContent(true);
+        showTimer = setTimeout(() => {
+          setShowContent(false);
+          hideTimer = setTimeout(() => {
+            setCurrentAdIndex((prevIndex) => (prevIndex + 1) % queryset2.length);
+            startCycle();
+          }, 3000);
+        }, 5000);
+      };
+
+      startCycle();
+    }
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [queryset2]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading advertisements...</Text>
+      </View>
+    );
+  }
+
+  if (queryset2.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      {showContent && queryset2[currentAdIndex] && (
+        <LinearGradient colors={['#015d68', '#000']} style={styles.container}>
+
+          <Image
+            source={{ uri: EndPoint + queryset2[currentAdIndex].PichaYa1 }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>
+              {queryset2[currentAdIndex].MainTitle ? queryset2[currentAdIndex].MainTitle : ''}
+            </Text>
+            <Text style={styles.description}>
+              {queryset2[currentAdIndex].Description}
+            </Text>
+          </View>
+
+          {/* HII NDIO BUTTON YENYEWE */}
+          <TouchableOpacity style={styles.button} 
+         onPress={() => {
+                navigation.navigate('Matangazo Screen');    
+                  }}
+          >
+            <Ionicons name="arrow-forward-circle" size={24} color="white" />
+            <Text style={styles.buttonText}>Zaidi</Text>
+          </TouchableOpacity>
+
+        </LinearGradient>
+      )}
+    </>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    position: 'absolute',
+    top: 0,
+    left: 5,
+    right: 5,
+    paddingTop: 20,
+    zIndex: 1000,
+    borderRadius: 10,
+  },
+  loadingContainer: {
+    backgroundColor: '#fff',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  textContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+    flexShrink: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 14,
+    color: 'white',
+  },
+  button: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: '#1e88e5',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 5, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  buttonText: {
+    color: 'white',
+    marginLeft: 5,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+});
+
+export default MatangazoScreen2;

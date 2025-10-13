@@ -1,0 +1,96 @@
+Kwenye Task weka hii na muda tumia uleule ambao unauona pale usiongeze wala kupunguza masaa km bado kwenye app yako unatumia UTC.
+
+
+/home/MfugajiAppV1/.virtualenvs/V1/bin/python /home/MfugajiAppV1/MfugajiAppApisV1/MainProjectFolder/manage.py  run_scheduler
+
+
+--------------------READ ME----------------------------
+Hatua ya 1: Kuunda Management Command
+Kwanza, hakikisha una management command kwenye app yako ya Django ambayo itasimamia kazi yako ya ratiba.
+
+1.1 Unda Management Command
+Katika App yako, unda saraka mpya management/commands ikiwa haipo tayari:
+
+markdown
+Copy code
+App/
+    management/
+        commands/
+            __init__.py
+            run_scheduler.py
+Andika run_scheduler.py kama ifuatavyo:
+
+python
+Copy code
+# App/management/commands/run_scheduler.py
+import schedule
+import time as tm
+from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.core.mail import send_mail
+from App.models import KumbushoUsafishajiBanda
+
+def job():
+    print("Program starting here")
+    users = KumbushoUsafishajiBanda.objects.all()
+
+    for item in users:
+        SikuZaKukumbushwa = item.SikuZaKukumbushwa
+        Awamu = item.Awamu
+        username = item.username
+
+        # Tuma barua pepe kwa mtumiaji
+        email = item.email
+        subject = "Mfugaji Smart"
+        message = f"Email kutoka Mfugaji Smart App. \n Hello {username}, ulisema tukukumbushe baada ya siku {SikuZaKukumbushwa}, leo ni siku ya {SikuZaKukumbushwa} toka uweke kumbusho lako, hivyo tunakukumbusha kusafisha banda"
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [email]
+        send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+
+        print(f"UMRI {SikuZaKukumbushwa}")
+        print(f"Jina: {username}, Siku: {SikuZaKukumbushwa}")
+        print(f"Program Ends \n \n")
+
+def start_scheduler():
+    users = KumbushoUsafishajiBanda.objects.all()
+    if users.exists():
+        dynamic_interval = users[0].SikuZaKukumbushwa  # Kwa mfano, tumia thamani ya kwanza
+        print(f"DYNAMIC {dynamic_interval}")
+        # Panga kazi kwa kutumia dynamic interval
+        schedule.every(dynamic_interval).seconds.do(job)
+    else:
+        print("Hakuna watumiaji waliopatikana.")
+
+    while True:
+        schedule.run_pending()
+        tm.sleep(1)
+
+class Command(BaseCommand):
+    help = 'Starts the scheduler'
+
+    def handle(self, *args, **kwargs):
+        start_scheduler()
+Hatua ya 2: Kuunda cron job kwenye PythonAnywhere
+2.1 Ingia kwenye akaunti yako ya PythonAnywhere
+Nenda kwenye PythonAnywhere na ingia kwenye akaunti yako.
+2.2 Nenda kwenye sehemu ya "Tasks"
+Kutoka kwenye dashboard yako, nenda kwenye tab ya "Tasks".
+2.3 Ongeza cron job mpya
+Chini ya "Scheduled tasks", bonyeza "Add a new scheduled task".
+2.4 Sanidi cron job yako
+Katika sehemu ya "Command to run", ingiza amri ifuatayo:
+sh
+Copy code
+/path/to/your/virtualenv/bin/python /path/to/your/project/manage.py run_scheduler
+Badilisha /path/to/your/virtualenv/bin/python na njia kamili ya virtualenv yako na /path/to/your/project/manage.py na njia kamili ya manage.py ya mradi wako wa Django.
+
+
+
+Hatua ya 3: Hakikisha Scheduler Inakimbia Kila Sekunde Tano
+Badilisha sehemu ya handle kwenye run_scheduler.py kama ifuatavyo:
+
+
+Kazi Imekamilika
+Sasa kazi yako ya ratiba itakimbia kila dakika kupitia cron job ya PythonAnywhere na ndani ya script hiyo, kazi itakimbia kila sekunde tano kama ilivyosanidiwa.
+
+Kwa njia hii, unakuwa na uhakika kwamba kazi yako ya ratiba inaendelea kukimbia bila kuathiri utendakazi wa server yako ya Django kwenye PythonAnywhere.
