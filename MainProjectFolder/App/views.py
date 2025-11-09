@@ -2,6 +2,7 @@
 #AddWatejaWoteView
 #AddRipotiView
 #RejeshoKwaSiku
+#CountAllWatejaWoteView
 
 from django.views import View
 from django.shortcuts import render, get_object_or_404, redirect
@@ -514,6 +515,14 @@ class AddWatejaWoteView(APIView):
         # Automatically fill in fields from the user
         data['AmesajiliwaNa'] = user.username
 
+        Interval_ya_malipo_yote = data.get('Interval', None)
+        Interval_ya_malipo_yote = int(Interval_ya_malipo_yote)
+
+        kiasi_cha_riba_iliyojazwa = data.get('Kiasicha_Riba_Kwa_Muda_Wa_Mkopo', 0)
+        kiasi_cha_riba_iliyojazwa = int(kiasi_cha_riba_iliyojazwa)
+
+        kiasi_cha_riba_iliyojazwa_in_asilimia = int(kiasi_cha_riba_iliyojazwa / 100)
+
         # Ensure 'KiasiAnachokopa' is provided
         kiasi_anachokopa = data.get('KiasiAnachokopa', None)
         if not kiasi_anachokopa:
@@ -537,18 +546,18 @@ class AddWatejaWoteView(APIView):
 
         # Perform calculations based on the 'Aina' value
         if aina_instance and aina_instance.Aina == 'Muajiriwa':
-            riba_kwa_mkopo = int((kiasi_anachokopa * 30) / 100)
+            riba_kwa_mkopo = int((kiasi_anachokopa * kiasi_cha_riba_iliyojazwa) / 100)
             deni_plus_riba = kiasi_anachokopa + riba_kwa_mkopo
             rejesho_kwa_siku = 0
 
         elif aina_instance and aina_instance.Aina == 'Mfanya Kazi Wa Kituo':
-            riba_kwa_mkopo = int((kiasi_anachokopa * 10) / 100)
+            riba_kwa_mkopo = int((kiasi_anachokopa * kiasi_cha_riba_iliyojazwa) / 100)
             deni_plus_riba = kiasi_anachokopa + riba_kwa_mkopo
             rejesho_kwa_siku = 0
 
         else:
             # Default calculations if 'Aina' is not specified or doesn't match the above cases
-            riba_kwa_mkopo = int((kiasi_anachokopa * 20) / 100)
+            riba_kwa_mkopo = int((kiasi_anachokopa * kiasi_cha_riba_iliyojazwa) / 100)
             deni_plus_riba = kiasi_anachokopa + riba_kwa_mkopo
             rejesho_kwa_siku = round((deni_plus_riba) / 30, 0)
         
@@ -571,18 +580,31 @@ class AddWatejaWoteView(APIView):
 
             #hakikisha mteja anaanza rejesho kesho yake
 
+
             mteja_created_date = wateja.Created +  timedelta(days=1)
+
+            mwisho_wa_malipo_month = Interval_ya_malipo_yote  # Adjust as needed
+            mwisho_wa_malipo_days = mwisho_wa_malipo_month * 30
+            #wateja.Up_To = wateja.Created + timedelta(days=mwisho_wa_malipo_days)
+
+
             wateja.Created = mteja_created_date #update Created date badala ya leo ianze kesho
             # Calculate and set `Up_To`
-            wateja.Up_To = wateja.Created + timedelta(days=30)
+            wateja.Up_To = wateja.Created + timedelta(days=mwisho_wa_malipo_days)
+
             
             wateja.KiasiAnachokopa = deni_plus_riba
             wateja.Ni_Mteja_Hai = True
 
-            wateja.Amerejesha_Leo = True
+            #wateja.Amerejesha_Leo = True
             wateja.Nje_Ya_Mkata_Wote = False
             wateja.Nje_Ya_Mkata_Leo = False
             wateja.Wamemaliza_Hawajakopa_Tena = False
+
+            if aina_instance and aina_instance.Aina == 'Muajiriwa':
+                wateja.Amerejesha_Leo = False
+            else:
+                wateja.Amerejesha_Leo = True
 
             
 
@@ -664,6 +686,14 @@ class UpdateWatejaWotePostView(APIView):
             # Automatically fill in fields from the user
             data['AmesajiliwaNa'] = user.username
 
+            Interval_ya_malipo_yote = data.get('Interval', None)
+            Interval_ya_malipo_yote = int(Interval_ya_malipo_yote)
+
+            kiasi_cha_riba_iliyojazwa = data.get('Kiasicha_Riba_Kwa_Muda_Wa_Mkopo', 0)
+            kiasi_cha_riba_iliyojazwa = int(kiasi_cha_riba_iliyojazwa)
+
+            kiasi_cha_riba_iliyojazwa_in_asilimia = int(kiasi_cha_riba_iliyojazwa / 100)
+
             # Ensure 'KiasiAnachokopa' is provided
             kiasi_anachokopa = data.get('KiasiAnachokopa', None)
             if not kiasi_anachokopa:
@@ -687,18 +717,18 @@ class UpdateWatejaWotePostView(APIView):
 
             # Perform calculations based on the 'Aina' value
             if aina_instance and aina_instance.Aina == 'Muajiriwa':
-                riba_kwa_mkopo = int((kiasi_anachokopa * 30) / 100)
+                riba_kwa_mkopo = int((kiasi_anachokopa * kiasi_cha_riba_iliyojazwa) / 100)
                 deni_plus_riba = kiasi_anachokopa + riba_kwa_mkopo
                 rejesho_kwa_siku = 0
 
             elif aina_instance and aina_instance.Aina == 'Mfanya Kazi Wa Kituo':
-                riba_kwa_mkopo = int((kiasi_anachokopa * 10) / 100)
+                riba_kwa_mkopo = int((kiasi_anachokopa * kiasi_cha_riba_iliyojazwa) / 100)
                 deni_plus_riba = kiasi_anachokopa + riba_kwa_mkopo
                 rejesho_kwa_siku = 0
 
             else:
                 # Default calculations if 'Aina' is not specified or doesn't match the above cases
-                riba_kwa_mkopo = int((kiasi_anachokopa * 20) / 100)
+                riba_kwa_mkopo = int((kiasi_anachokopa * kiasi_cha_riba_iliyojazwa) / 100)
                 deni_plus_riba = kiasi_anachokopa + riba_kwa_mkopo
                 rejesho_kwa_siku = round((deni_plus_riba) / 30, 0)
             
@@ -736,10 +766,18 @@ class UpdateWatejaWotePostView(APIView):
 
                 #hakikisha mteja anaanza rejesho kesho yake
 
-                mteja_created_date = tarehe_ya_leo +  timedelta(days=1)
+                
+
+                mteja_created_date = wateja.Created +  timedelta(days=1)
+
+                mwisho_wa_malipo_month = Interval_ya_malipo_yote  # Adjust as needed
+                mwisho_wa_malipo_days = mwisho_wa_malipo_month * 30
+                #wateja.Up_To = wateja.Created + timedelta(days=mwisho_wa_malipo_days)
+
+
                 wateja.Created = mteja_created_date #update Created date badala ya leo ianze kesho
                 # Calculate and set `Up_To`
-                wateja.Up_To = wateja.Created + timedelta(days=30)
+                wateja.Up_To = wateja.Created + timedelta(days=mwisho_wa_malipo_days)
                 
                 wateja.KiasiAnachokopa = deni_plus_riba
                 wateja.RejeshoKwaSiku = rejesho_kwa_siku
@@ -752,10 +790,15 @@ class UpdateWatejaWotePostView(APIView):
 
                 wateja.Ni_Mteja_Hai = True
 
-                wateja.Amerejesha_Leo = True
+                #wateja.Amerejesha_Leo = True
                 wateja.Nje_Ya_Mkata_Wote = False
                 wateja.Nje_Ya_Mkata_Leo = False
                 wateja.Wamemaliza_Hawajakopa_Tena = False
+
+                if aina_instance and aina_instance.Aina == 'Muajiriwa':
+                    wateja.Amerejesha_Leo = False
+                else:
+                    wateja.Amerejesha_Leo = True
 
                 wateja.save()
 

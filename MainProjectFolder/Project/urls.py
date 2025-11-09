@@ -58,6 +58,6 @@ if settings.DEBUG:
     urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 
 
-admin.site.site_header= "TMCL MICROFINANCE"
+admin.site.site_header= "MGORE MICROFINANCE"
 admin.site.site_title = "ADMIN AREA"
 admin.site.index_title = "WELCOME TO ADMIN DASHBOARD"

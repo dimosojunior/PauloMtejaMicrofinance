@@ -262,6 +262,10 @@ class WatejaWote(models.Model):
     Created = models.DateTimeField(default=now, blank=True, null=True)
     Updated = models.DateTimeField(auto_now=True)
 
+
+    Interval = models.IntegerField(verbose_name="Interval", blank=True,null=True, default=0)
+    Kiasicha_Riba_Kwa_Muda_Wa_Mkopo = models.IntegerField(verbose_name="Kiasicha Riba Kwa Muda Wa Mkopo (Kwa Watumishi wa Umma )", blank=True,null=True, default=0)
+
     # AinaZaMarejesho_Choices = (
     #         ('Kila Siku', 'Kila Siku'),
     #         ('Baada Ya Mwezi', 'Baada Ya Mwezi'),
@@ -271,6 +275,17 @@ class WatejaWote(models.Model):
 
     time_left = models.IntegerField(blank=True, null=True)
     is_red = models.BooleanField(default=False)
+
+
+    AinaYaKazi = models.CharField(verbose_name="Aina Ya Kazi", max_length=500,blank=True,null=True)
+    KituoChaKazi = models.CharField(verbose_name="Kituo Cha Kazi", max_length=500,blank=True,null=True)
+    IdaraYaKazi = models.CharField(verbose_name="Idara Ya Kazi", max_length=500,blank=True,null=True)
+    KataYaKazi = models.CharField(verbose_name="Kata Ya Kazi", max_length=500,blank=True,null=True)
+    CheckNo = models.IntegerField(verbose_name="Check Number", blank=True,null=True, default=0)
+
+
+    #AinaYaKitambulisho = models.ForeignKey(Vitambulisho, on_delete=models.PROTECT, blank=True,null=True) 
+    #NambaYaKitambulisho = models.CharField(verbose_name="Namba Ya Kitambulisho", max_length=500,blank=True,null=True)
 
     
     
