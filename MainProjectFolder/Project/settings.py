@@ -33,7 +33,7 @@ SECRET_KEY = "x*za6xf&_80ofdpae!yzq61g9ffikkx9$*iygbl$j7rr4wlf8t"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','tmcl.website','www.tmcl.website','144.91.75.134']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','mgoremicrofinance.website','www.mgoremicrofinance.website','212.47.65.63']
 
 
 # Application definition
