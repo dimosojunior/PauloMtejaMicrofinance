@@ -1,177 +1,329 @@
-yes now in the part of description i have a problem, i need also description to be displayed in a button so create a good attractive button to display a description with an icon left.
-my full codes are;
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { EndPoint } from '../Constant/links';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons'; // icon nzuri
-import { useNavigation } from '@react-navigation/native';
+wewe msenge nini sasa mbona kwenye table ya Users kuna mtu halafu nikienda kwenye template napata empty records 'No users found for this filter.' na huyo user nimecreate sasa hivi wewe msenge kweli nimekwambia nikiingia nikute user ambao wamesjiliwa leo by default wewe vipi mzee?
+my views.py codes are;
 
-const MatangazoScreen2 = () => {
+# -------------------------
+# Admin: Users review page
+# -------------------------
+# @login_required
+# @user_passes_test(is_admin_user)
+def admin_users_review_view(request):
+    """
+    Page where admin sees users created today by default.
+    Query params:
+      - date (YYYY-MM-DD) -> filter by date
+      - filter -> 'all' | 'approved' | 'not_approved'
+    """
+    # parse filter params
+    filter_mode = request.GET.get("filter", "today")  # today, all, approved, not_approved
+    date_str = request.GET.get("date")  # optional YYYY-MM-DD
 
-const navigation = useNavigation();
+    qs = Users.objects.all()
 
-  const [queryset2, setQueryset2] = useState([]);
-  const [currentAdIndex, setCurrentAdIndex] = useState(0);
-  const [showContent, setShowContent] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+    # default: show today's users
+    if filter_mode == "all":
+        qs = qs.order_by("-created_at")
+    elif filter_mode == "approved":
+        qs = qs.filter(status='A').order_by("-created_at")
+    elif filter_mode == "not_approved":
+        qs = qs.filter(status='N').order_by("-created_at")
+    else:
+        # today by default or when filter_mode == "today"
+        today = timezone.localdate()
+        qs = qs.filter(created_at__date=today).order_by("-created_at")
 
-  const fetchAdvertisements = async () => {
-    try {
-      const response = await axios.get(EndPoint + `/GetAllSlidingInformationsView/`);
-      console.log("ALL MATANGAZO:", response.data);
+    # if date provided explicitly, override
+    if date_str:
+        try:
+            chosen = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+            qs = Users.objects.filter(created_at__date=chosen).order_by("-created_at")
+        except Exception:
+            messages.error(request, "Invalid date format. Use YYYY-MM-DD.")
 
-      if (response.data.queryset2) {
-        setQueryset2(response.data.queryset2);
-      } else {
-        setQueryset2(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching advertisements:', error);
-    } finally {
-      setIsLoading(false);
+    # prepare list for template
+    users = qs
+
+    context = {
+        "users": users,
+        "filter_mode": filter_mode,
+        "date_str": date_str or "",
     }
-  };
+    return render(request, "db/admin_users_review.html", context)
 
-  useEffect(() => {
-    fetchAdvertisements();
-  }, []);
 
-  useEffect(() => {
-    let showTimer;
-    let hideTimer;
+# -------------------------
+# Toggle approve/unapprove via AJAX POST
+# -------------------------
+@login_required
+@user_passes_test(is_admin_user)
+@require_POST
+def toggle_user_status(request, user_id):
+    """
+    Toggle between Approved (A) and Not Approved (N).
+    Expect JSON or form POST; returns JSON.
+    """
+    user_obj = get_object_or_404(Users, pk=user_id)
 
-    if (queryset2.length > 0) {
-      const startCycle = () => {
-        setShowContent(true);
-        showTimer = setTimeout(() => {
-          setShowContent(false);
-          hideTimer = setTimeout(() => {
-            setCurrentAdIndex((prevIndex) => (prevIndex + 1) % queryset2.length);
-            startCycle();
-          }, 3000);
-        }, 5000);
-      };
+    action = request.POST.get("action")  # 'approve' or 'unapprove'
+    if not action:
+        return HttpResponseBadRequest("Missing action")
 
-      startCycle();
+    if action == "approve":
+        user_obj.status = 'A'
+    else:
+        user_obj.status = 'N'
+
+    user_obj.updated_at = timezone.now()
+    user_obj.save()
+
+    return JsonResponse({
+        "ok": True,
+        "new_status": user_obj.status,
+        "status_label": "Approved" if user_obj.status == 'A' else "Not Approved",
+    })
+
+
+# -------------------------
+# Fetch single user details (AJAX) to show in modal
+# -------------------------
+@login_required
+@user_passes_test(is_admin_user)
+def admin_user_detail(request, user_id):
+    user_obj = get_object_or_404(Users, pk=user_id)
+    data = {
+        "id": user_obj.id,
+        "first_name": user_obj.first_name,
+        "middle_name": user_obj.middle_name,
+        "surname": user_obj.surname,
+        "email": user_obj.email,
+        "mobile": user_obj.mobile,
+        "status": user_obj.status,
+        "status_label": "Approved" if user_obj.status == 'A' else "Not Approved",
+        "created_at": user_obj.created_at.isoformat() if user_obj.created_at else "",
     }
+    return JsonResponse(data)
 
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-    };
-  }, [queryset2]);
+my template codes are;
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Admin - Today's Users Review</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading advertisements...</Text>
-      </View>
-    );
-  }
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  if (queryset2.length === 0) {
-    return null;
-  }
+    <style>
+        /* visual style */
+        body { background: #f4f6f8; color: #222; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }
+        .container-xl { padding-top: 30px; }
+        .card-custom { border-radius: 10px; box-shadow: 0 8px 24px rgba(18,38,63,0.06); overflow: hidden; }
+        .top-controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+        .btn-ghost { background: transparent; border: 1px solid #e6eef8; }
+        .status-badge { padding: 6px 10px; border-radius: 999px; font-weight:600; font-size:0.85rem; }
+        .status-approved { background:#dff7ea; color:#0b7a3a; }
+        .status-not { background:#ffdde0; color:#a40012; }
+        .row-hover tbody tr:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+        .not-approved-row { background: linear-gradient(90deg, rgba(255,238,238,0.8), rgba(255,250,250,0.6)); }
+        .small-muted { color:#6c757d; font-size:0.9rem; }
 
-  return (
-    <>
-      {showContent && queryset2[currentAdIndex] && (
-        <LinearGradient colors={['#015d68', '#000']} style={styles.container}>
+        /* Responsive transform for controls */
+        @media (max-width: 768px) {
+            .top-controls { flex-direction:column; align-items: stretch; }
+        }
 
-          <Image
-            source={{ uri: EndPoint + queryset2[currentAdIndex].PichaYa1 }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+        /* animation */
+        .fade-in { animation: fadeInUp .35s ease both; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity:1; transform: none; } }
 
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>
-              {queryset2[currentAdIndex].MainTitle ? queryset2[currentAdIndex].MainTitle : ''}
-            </Text>
-            <Text style={styles.description}>
-              {queryset2[currentAdIndex].Description}
-            </Text>
-          </View>
+    </style>
+</head>
+<body>
+<div class="container-xl">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-0">Users Review</h3>
+            <div class="small-muted">Review newly created users and approve/unapprove quickly.</div>
+        </div>
+        <div class="text-end">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
+    </div>
 
-          {/* HII NDIO BUTTON YENYEWE */}
-          <TouchableOpacity style={styles.button} 
-         onPress={() => {
-                navigation.navigate('Matangazo Screen');    
-                  }}
-          >
-            <Ionicons name="arrow-forward-circle" size={24} color="white" />
-            <Text style={styles.buttonText}>Zaidi</Text>
-          </TouchableOpacity>
+    <div class="card card-custom p-3 fade-in">
+        <!-- Controls -->
+        <div class="d-flex justify-content-between align-items-center mb-3 top-controls">
+            <div class="d-flex gap-2 align-items-center">
+                <form id="filterForm" method="get" class="d-flex gap-2 align-items-center">
+                    <input type="date" name="date" class="form-control form-control-sm" value="{{ date_str }}" />
+                    <select name="filter" class="form-select form-select-sm">
+                        <option value="today" {% if filter_mode == "today" %}selected{% endif %}>Today</option>
+                        <option value="all" {% if filter_mode == "all" %}selected{% endif %}>All</option>
+                        <option value="approved" {% if filter_mode == "approved" %}selected{% endif %}>Approved</option>
+                        <option value="not_approved" {% if filter_mode == "not_approved" %}selected{% endif %}>Not Approved</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                    <a href="{% url 'admin_users_review' %}?filter=all" class="btn btn-outline-primary btn-sm">All</a>
+                </form>
+            </div>
 
-        </LinearGradient>
-      )}
-    </>
-  );
-};
+            <div class="d-flex gap-2">
+                <div class="small-muted">Legend:</div>
+                <div class="status-badge status-not">Not Approved</div>
+                <div class="status-badge status-approved">Approved</div>
+            </div>
+        </div>
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    position: 'absolute',
-    top: 0,
-    left: 5,
-    right: 5,
-    paddingTop: 20,
-    zIndex: 1000,
-    borderRadius: 10,
-  },
-  loadingContainer: {
-    backgroundColor: '#fff',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-  },
-  textContainer: {
-    flex: 1,
-    paddingHorizontal: 10,
-    flexShrink: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 14,
-    color: 'white',
-  },
-  button: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    backgroundColor: '#1e88e5',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    elevation: 5, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-  },
-  buttonText: {
-    color: 'white',
-    marginLeft: 5,
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-hover row-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Created At</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for u in users %}
+                    {% comment %} row class if not approved {% endcomment %}
+                    <tr class="{% if u.status == 'N' %}not-approved-row{% endif %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ u.first_name }} {% if u.middle_name %}{{ u.middle_name }}{% endif %} {{ u.surname }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>{{ u.mobile }}</td>
+                        <td>{{ u.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if u.status == 'A' %}
+                                <span class="status-badge status-approved">Approved</span>
+                            {% else %}
+                                <span class="status-badge status-not">Not Approved</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="openUserModal({{ u.id }})">
+                                Update
+                            </button>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7" class="text-center small-muted">No users found for this filter.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><span id="modalUserName">User</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalBodyContent">
+            <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+            <p><strong>Mobile:</strong> <span id="modalMobile"></span></p>
+            <p><strong>Created:</strong> <span id="modalCreated"></span></p>
+            <p><strong>Status:</strong> <span id="modalStatus" class="fw-bold"></span></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="approveBtn" type="button" class="btn btn-success">Approve</button>
+        <button id="unapproveBtn" type="button" class="btn btn-outline-danger">Unapprove</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS + Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const csrftoken = (function() {
+    // get csrf cookie
+    function getCookie(name) {
+        let v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return v ? v.pop() : '';
+    }
+    return getCookie('csrftoken');
+})();
+
+let currentUserId = null;
+const userModal = new bootstrap.Modal(document.getElementById('userModal'));
+
+function openUserModal(userId) {
+    currentUserId = userId;
+    // fetch details
+    fetch(`{% url 'admin_user_detail' 0 %}`.replace('/0/', `/${userId}/`))
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('modalUserName').textContent = `${data.first_name} ${data.surname}`;
+        document.getElementById('modalEmail').textContent = data.email || '-';
+        document.getElementById('modalMobile').textContent = data.mobile || '-';
+        document.getElementById('modalCreated').textContent = data.created_at ? new Date(data.created_at).toLocaleString() : '-';
+        document.getElementById('modalStatus').textContent = data.status_label || '-';
+
+        // show/hide approve/unapprove buttons based on status
+        if (data.status === 'A') {
+            document.getElementById('approveBtn').style.display = 'none';
+            document.getElementById('unapproveBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('approveBtn').style.display = 'inline-block';
+            document.getElementById('unapproveBtn').style.display = 'none';
+        }
+
+        userModal.show();
+    })
+    .catch(err => {
+        alert('Failed to load user details');
+        console.error(err);
+    });
+}
+
+document.getElementById('approveBtn').addEventListener('click', function() {
+    toggleStatus('approve');
+});
+document.getElementById('unapproveBtn').addEventListener('click', function() {
+    toggleStatus('unapprove');
 });
 
-export default MatangazoScreen2;
+function toggleStatus(action) {
+    if (!currentUserId) return;
+    fetch(`{% url 'toggle_user_status' 0 %}`.replace('/0/', `/${currentUserId}/`), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({ action })
+    })
+    .then(r => r.json())
+    .then(resp => {
+        if (resp.ok) {
+            // update UI: close modal and reload page to reflect new status
+            userModal.hide();
+            setTimeout(()=>location.reload(), 300);
+        } else {
+            alert('Action failed');
+        }
+    })
+    .catch(err => {
+        alert('Request failed');
+        console.error(err);
+    });
+}
+</script>
+</body>
+</html>
+
+nirekebishie then nipe full codes kama nilivyokupa mimi bil kuacha kitu full codes

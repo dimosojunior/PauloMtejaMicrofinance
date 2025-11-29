@@ -1,589 +1,243 @@
-i'm using expo react native and django rest apis and here i have a problem, i need to implement something below;
-1.nina view kwaajili ya kumuwezesha buyer kumake order, ambayo inaonekana kama hivi;
+nimejaribu kucreate upya kabisa my customer user model ya Users lakini nimejaribu tena kucreatesuperuser lakini bado napata hiki kitu '
+(myenv) C:\Users\DIMOSO JR\Desktop\MyDjangoProjects\DjangoTemplates\Samson-mysql-database\database>python manage.py makemigrations
+Migrations for 'db':
+  db\migrations\0001_initial.py
+    - Create model Users
+    - Create model AreaOfInterests
+    - Create model Associations
+    - Create model BusinessChallenges
+    - Create model BusinessMultSectors
+    - Create model BusinessSectors
+    - Create model BusinessSizeDefinitions
+    - Create model BusinessTitles
+    - Create model BusinessTypes
+    - Create model ConfirmAttendences
+    - Create model Disabilities
+    - Create model Districts
+    - Create model EducationLevels
+    - Create model MaritualStatuses
+    - Create model MemberAreaOfInterests
+    - Create model MemberBusinessChallenges
+    - Create model MemberBusinesses
+    - Create model MemberBusinessHistories
+    - Create model MemberBusinessHistoryAssociations
+    - Create model MemberBusinessOwnerInfos
+    - Create model MemberBusinessSectors
+    - Create model MemberBusinessTypes
+    - Create model MemberCommentAndFeedback
+    - Create model MemberDisabilities
+    - Create model MemberFamiliyInfos
+    - Create model Members
+    - Create model MembershipBusinessSizes
+    - Create model MembershipCategories
+    - Create model MembershipFees
+    - Create model MembershipPayments
+    - Create model MembershipReceipts
+    - Create model Memberships
+    - Create model MemberTechnologyUses
+    - Create model MemberTrainings
+    - Create model Migrations
+    - Create model Otps
+    - Create model PaidServices
+    - Create model PasswordResetTokens
+    - Create model PermissionCategories
+    - Create model PermissionRoles
+    - Create model Permissions
+    - Create model PersonalAccessTokens
+    - Create model ProductionUnits
+    - Create model QualifiedIdsForprints
+    - Create model Regions
+    - Create model Roles
+    - Create model SocialMedia
+    - Create model StaffReports
+    - Create model TwccTrainings
+    - Create model UserRoles
+    - Create model Wards
+    - Create model Zones
 
-class CollectionCenters(models.Model):
-    CenterID = models.IntegerField(verbose_name="Center ID", blank=True, null=True)
-    
-    CenterName = models.CharField(verbose_name="Center Name",max_length=500, blank=True,null=True)
+(myenv) C:\Users\DIMOSO JR\Desktop\MyDjangoProjects\DjangoTemplates\Samson-mysql-database\database>python manage.py migrate
+System check identified some issues:
 
-    Location = models.CharField(max_length=200, verbose_name="Centre Location", blank=True, null=True)
-    WarehouseSize = models.IntegerField(verbose_name="Warehouse Size", blank=True, null=True)
-    
-    Created = models.DateTimeField(auto_now_add=True)
-    Updated = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.CenterName}"
-    
-    class Meta:
-        verbose_name_plural = "Collection Centers"
+WARNINGS:
+?: (mysql.W002) MariaDB Strict Mode is not set for database connection 'default'
+        HINT: MariaDB's Strict Mode fixes many data integrity problems in MariaDB, such as data truncation upon insertion, by escalating warnings into errors. It is strongly recommended you activate it. See: https://docs.djangoproject.com/en/4.2/ref/databases/#mysql-sql-mode
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, db, sessions
+Running migrations:
+  No migrations to apply.
+
+(myenv) C:\Users\DIMOSO JR\Desktop\MyDjangoProjects\DjangoTemplates\Samson-mysql-database\database>python manage.py createsuperuser
+Email: admin@gmail.com
+Traceback (most recent call last):
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'users.username' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\DIMOSO JR\Desktop\MyDjangoProjects\DjangoTemplates\Samson-mysql-database\database\manage.py", line 22, in <module>
+    main()
+  File "C:\Users\DIMOSO JR\Desktop\MyDjangoProjects\DjangoTemplates\Samson-mysql-database\database\manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\core\management\__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\core\management\__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\core\management\base.py", line 412, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\contrib\auth\management\commands\createsuperuser.py", line 88, in execute
+    return super().execute(*args, **options)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\core\management\base.py", line 458, in execute
+    output = self.handle(*args, **options)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\contrib\auth\management\commands\createsuperuser.py", line 130, in handle
+    error_msg = self._validate_username(
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\contrib\auth\management\commands\createsuperuser.py", line 295, in _validate_username
+    self.UserModel._default_manager.db_manager(database).get_by_natural_key(
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\contrib\auth\base_user.py", line 54, in get_by_natural_key
+    return self.get(**{self.model.USERNAME_FIELD: username})
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\models\query.py", line 633, in get
+    num = len(clone)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\models\query.py", line 380, in __len__
+    self._fetch_all()
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\models\query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\DIMOSO JR\Envs\myenv\lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'users.username' in 'field list'")
+
+(myenv) C:\Users\DIMOSO JR\Desktop\MyDjangoProjects\DjangoTemplates\Samson-mysql-database\database>
 
 
+'
 
-#AFTER MAKING ORDER IF YOU WANT TO DELETE A CART ITEMS USE THIS
-class StocksCollectionOrderView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+lakini kwenye model yangu ya Users hakuna hii field ya username na mimi nilikuwa sitaki kuitumia why inaniambia hivyo nakosea wapi lakini?, hizo fields mpya zote nilizoziongeza kwenye model yangu pia nimeziongeza kwenye database lakini bado sielewi nafanyaje?
+my model codes are;
+class MyUserManager(BaseUserManager):
+    def create_user(self, email,mobile, is_superuser,is_staff, password=None):
+        if not email:
+            raise ValueError("email is required")
+        # if not username:
+        #     raise ValueError("Your user name is required")
 
-    
-
-    #----------------MAKE ORDER --------------------
-    def post(self, request):
-        user = request.user
-        data = request.data
-        Buyer = request.user.username
         
 
-        total_price = request.data.get('total_price', 0)  # You may calculate this on the server
-        cart = StocksCollectionCart.objects.filter(user=user, ordered=False).first()
-
-        if not cart:
-            return Response({'error': 'No items in the cart'}, status=status.HTTP_400_BAD_REQUEST)
 
         
-        # Create the order
-        # order = StocksCollectionOrder.objects.create(user=user, total_price=total_price, table_number=table.TableNumber)
-        order = StocksCollectionOrder.objects.create(
-            Buyer=Buyer, 
-            user=user, 
-            total_price=total_price
+        
+
+        user=self.model(
+            email=self.normalize_email(email),
+            #username=username,
+            mobile=mobile,
+            is_superuser=is_superuser,
+            is_staff=is_staff,
+                        
+            
+            
         )
-        
-        # Assign the first category ID found to the Order CategoryId field
-        # if product_category_ids:
-        #     order.CategoryId = product_category_ids.pop()
-        #     order.save()
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    def create_superuser(self, mobile, email, password=None):
+        user = self.create_user(
+            email=self.normalize_email(email),
+            mobile=mobile,
+           # phone="0000000",  # default phone for superuser
+                  # default location
+            is_superuser=True,
+            is_staff=True,
+            # is_cashier=True,
+            # JinaLaKituo=None,
+            password=password
+        )
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
 
-        total_cart_items = StocksCollectionCartItems.objects.filter(user=user)
+class Users(AbstractUser):
+    id = models.BigAutoField(primary_key=True)
 
-        total_price = 0
-        for items in total_cart_items:
-            total_price += items.price
-        order.total_price = total_price
-        order.save()
+    
 
-        # table.TableStatus = False
-        # table.save()
+    # Your custom fields
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255, blank=True, null=True)  # <- ADDED FIX
+    middle_name = models.CharField(max_length=255, blank=True, null=True)
+    surname = models.CharField(max_length=255)
+    type = models.CharField(max_length=1)
+    gender = models.CharField(max_length=1)
+    email = models.CharField(max_length=150, blank=True, null=True, unique=True)
+    mobile = models.CharField(unique=True, max_length=100)
+    password = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=1)
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_visible = models.CharField(max_length=1)
+    region = models.ForeignKey(Regions, on_delete=models.CASCADE, blank=True, null=True)
+    remember_token = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
 
-        # Retrieve cart items and add them to the order
-        cart_items = StocksCollectionCartItems.objects.filter(user=user, cart=cart)
-        for cart_item in cart_items:
-            StocksCollectionOrderItems.objects.create(
-                user=user,
-                order=order,
-                product=cart_item.product,
-                
-                price=cart_item.price,
-                quantity=cart_item.quantity,
+    # Django control fields
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
 
-                #room=room,
-                # table=table,
-                # Customer=Customer
-                # CustomerFullName=cart_item.CustomerFullName,
-                # CustomerAddress=cart_item.CustomerAddress,
-                # PhoneNumber=cart_item.PhoneNumber
-            )
+    first_time = models.BooleanField(default=True)
 
 
-
-        # Clear the user's cart
-        cart_items.delete()
-        cart.total_price = 0
-        cart.ordered = True
-        cart.save()
-
-        return Response(StocksCollectionOrderSerializer(order).data, status=status.HTTP_201_CREATED)
-
-below are my models;
-
-class Buyers(models.Model):
-    GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-    ]
-
-    PARTICIPATION_GROUPS_CHOICES = [
-        ('yes', 'Yes'),
-        ('no', 'No'),
-    ]
-    full_name = models.CharField(max_length=200,verbose_name="Full Buyer Name", blank=False, null=False)
-    #NidaNo = models.IntegerField(verbose_name="Farmer Nida Number", blank=True, null=True)
-    #Education = models.ForeignKey(EducationLevels,verbose_name="Education Level", on_delete=models.PROTECT, blank=True,null=True)
-    #FarmerSize = models.FloatField(verbose_name="Farmer Size", blank=True,null=True)
-
-    #date_of_birth = models.DateField()
-    country = models.CharField(max_length=100,verbose_name="Country", blank=True, null=True)
-    region = models.CharField(max_length=100, verbose_name="Region", blank=True, null=True)
-    district = models.CharField(max_length=100, verbose_name="District", blank=True, null=True)
-    ward = models.CharField(max_length=100, verbose_name="Ward", blank=True, null=True)
-    #gender = models.CharField(max_length=6, choices=GENDER_CHOICES, verbose_name="Gender", blank=True, null=True)
-    #PARTICIPATION_GROUPS = models.CharField(max_length=3, choices=PARTICIPATION_GROUPS_CHOICES, verbose_name="Participation in Corporate Groups", blank=True, null=True)
-
-    #FarmersOwnership = models.ForeignKey(FarmersOwnershipTypes,verbose_name="Farmers Ownership Types", on_delete=models.PROTECT, blank=True,null=True)
-
-    MobileNumber = models.IntegerField(verbose_name="Mobile Number", blank=True, null=True)
-    #TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
-
-    Username = models.CharField(max_length=200,verbose_name="Username", blank=True, null=True)
-    Email = models.CharField(max_length=200,verbose_name="Email", blank=True, null=True)
-
-    Location = models.CharField(max_length=100, verbose_name="Physical Location", blank=True, null=True)
-
-    #Crops = models.ManyToManyField(CultivatedCrops, verbose_name="Cultivated Crops", blank=True)
-
-    Created = models.DateTimeField(auto_now_add=True)
-    Updated = models.DateTimeField(auto_now=True)
+    USERNAME_FIELD="email"
+    REQUIRED_FIELDS=['mobile']
+    
+    objects=MyUserManager()
 
     def __str__(self):
-        return self.full_name
+        return self.email
+
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
 
     class Meta:
-        verbose_name_plural = "Buyers"
-
-
-
-
-
-
-class Transporters(models.Model):
-    GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-    ]
-
-    TYPE_CHOICES = [
-        ('company', 'Company'),
-        ('individual', 'Individual'),
-    ]
-    full_name = models.CharField(max_length=200,verbose_name="Full Transporter Name", blank=False, null=False)
-    RegNo_TinNo = models.IntegerField(verbose_name="Registration/Tin No", blank=True, null=True)
-    #Education = models.ForeignKey(EducationLevels,verbose_name="Education Level", on_delete=models.PROTECT, blank=True,null=True)
-    #FarmerSize = models.FloatField(verbose_name="Farmer Size", blank=True,null=True)
-
-    #date_of_birth = models.DateField()
-    country = models.CharField(max_length=100,verbose_name="Country", blank=True, null=True)
-    region = models.CharField(max_length=100, verbose_name="Region", blank=True, null=True)
-    district = models.CharField(max_length=100, verbose_name="District", blank=True, null=True)
-    ward = models.CharField(max_length=100, verbose_name="Ward", blank=True, null=True)
-    #gender = models.CharField(max_length=6, choices=GENDER_CHOICES, verbose_name="Gender", blank=True, null=True)
-    Type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name="Type", blank=True, null=True)
-
-    #FarmersOwnership = models.ForeignKey(FarmersOwnershipTypes,verbose_name="Farmers Ownership Types", on_delete=models.PROTECT, blank=True,null=True)
-
-    MobileNumber = models.IntegerField(verbose_name="Mobile Number", blank=True, null=True)
-    #TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
-    ContactPerson = models.CharField(max_length=200,verbose_name="Name Of Contact Person", blank=True, null=True)
-    Username = models.CharField(max_length=200,verbose_name="Username", blank=True, null=True)
-    Email = models.CharField(max_length=200,verbose_name="Email", blank=True, null=True)
-
-    Location = models.CharField(max_length=200, verbose_name="Office Location", blank=True, null=True)
-
-    #Crops = models.ManyToManyField(CultivatedCrops, verbose_name="Cultivated Crops", blank=True)
-
-    Created = models.DateTimeField(auto_now_add=True)
-    Updated = models.DateTimeField(auto_now=True)
-
-
-    VehicleNo = models.CharField(max_length=200, verbose_name="Vehicle Number", blank=True, null=True)
-    VehicleType = models.CharField(max_length=200, verbose_name="Vehicle Type", blank=True, null=True)
-    Driver = models.CharField(max_length=200, verbose_name="Driver Name", blank=True, null=True)
-    DriverLicenceNo = models.CharField(max_length=200, verbose_name="Driver Licence Number", blank=True, null=True)
-    FeePerKm = models.FloatField(verbose_name="Fee Per Km", blank=True,null=True)
-    RoutesSpecification = models.CharField(max_length=200, verbose_name="Routes Specification", blank=True, null=True)
-    VehicleCapacity = models.CharField(max_length=200, verbose_name="Vehicle Capacity", blank=True, null=True)
-    VehicleStatus = models.CharField(max_length=200, verbose_name="Vehicle Status", blank=True, null=True)
-    AvailabilityStatus = models.CharField(max_length=200, verbose_name="Availability Status", blank=True, null=True)
-    EffectiveDate = models.DateField(verbose_name="Effective Date of Transaction", blank=True,null=True)
+        managed = False
+        db_table = 'users'
 
     def __str__(self):
-        return self.full_name
-
-    class Meta:
-        verbose_name_plural = "Transporters"
-
-class StocksCollection(models.Model):
-    
-    #---------------AUTOMATIC FIELDS -------------------
-    reg_no= models.CharField(max_length=100000,blank=True,null=True)
-    full_name = models.CharField(max_length=200,verbose_name="Full Farmer Name", blank=True, null=True)
-    #full_name = models.CharField(max_length=200,verbose_name="Full Farmer Name", blank=False, null=False)
-    NidaNo = models.IntegerField(verbose_name="Farmer Nida Number", blank=True, null=True)
-    Education = models.CharField(max_length=100, verbose_name="Education Level", blank=True,null=True)
-    FarmerSize = models.FloatField(verbose_name="Farmer Size", blank=True,null=True)
-
-    date_of_birth = models.DateField(blank=True,null=True)
-    FarmerImage = models.ImageField(verbose_name="Farmer Image", upload_to='media/FarmerImage/',blank=True,null=True)
-    country = models.CharField(max_length=100,verbose_name="Country", blank=True, null=True)
-    region = models.CharField(max_length=100, verbose_name="Region", blank=True, null=True)
-    district = models.CharField(max_length=100, verbose_name="District", blank=True, null=True)
-    ward = models.CharField(max_length=100, verbose_name="Ward", blank=True, null=True)
-    gender = models.CharField(max_length=6, verbose_name="Gender", blank=True, null=True)
-    PARTICIPATION_GROUPS = models.CharField(max_length=3, verbose_name="Participation in Corporate Groups", blank=True, null=True)
-
-    FarmersOwnership = models.CharField(max_length=100, verbose_name="Farmers Ownership Types", blank=True,null=True)
-
-    MobileNumber = models.IntegerField(verbose_name="Mobile Number", blank=True, null=True)
-    TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
-
-    Username = models.CharField(max_length=200,verbose_name="Username", blank=True, null=True)
-    Email = models.CharField(max_length=200,verbose_name="Email", blank=True, null=True)
-
-    #-------------------MWISHO WA AUTOMATIC FIELDS-----------------
-
-    CenterName = models.ForeignKey(CollectionCenters,verbose_name="Collection Point Name", on_delete=models.PROTECT, blank=True,null=True)
-    CropType = models.ForeignKey(CultivatedCrops,verbose_name="Crop Type", on_delete=models.PROTECT, blank=True,null=True)
-
-    
-    CropUnitPrice = models.FloatField(verbose_name="Crop Unit Price - Debe 1", blank=True, null=True)
-    StorageChargesPerUnit = models.FloatField(verbose_name="Storage Charges Per Unit - Debe 1", blank=True, null=True)
-
-    
-    Quantity = models.IntegerField(verbose_name="Amount at the Collection Centre - Debe", blank=True, null=True)
-
-    TotalPriceForAllDebe = models.FloatField(verbose_name="Total Price - All Debe", blank=True, null=True)
-    TotalStorageChargesForAllDebe = models.FloatField(verbose_name="Total Storage Charges - All Debe", blank=True, null=True)
-
-
-    InitialQuantity = models.FloatField(verbose_name="Initial Amount at the Collection Centre - Debe", blank=True, null=True)
-    
-    #Location = models.CharField(max_length=200, verbose_name="Centre Location", blank=True, null=True)
-    CropImage = models.ImageField(verbose_name="Crop Image", upload_to='media/CropsImages/',blank=True,null=True)
-    #Crops = models.ManyToManyField(CultivatedCrops, verbose_name="Cultivated Crops", blank=True)
-
-    Created_By = models.CharField(max_length=200,verbose_name="Imewekwa Na", blank=True, null=True)
-
-    
-    Is_Ended = models.BooleanField(default=False, blank=True, null=True)
-
-    Created = models.DateTimeField(auto_now_add=True)
-    Updated = models.DateTimeField(auto_now=True)
-    ReceiptDate = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.CropType.Crops
-
-    class Meta:
-        verbose_name_plural = "Stocks Collection"
-
-class StocksCollectionOrder(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True, null=True)
-    cart = models.ForeignKey(StocksCollectionCart, on_delete=models.CASCADE, blank=True, null=True)
-    # orderItems = models.ManyToManyField('StocksCollectionOrderItems')
-    total_price = models.FloatField(verbose_name="Total Price")
-
-    CategoryId = models.IntegerField(verbose_name="Category ID",blank=True,null=True)
-    closed_order_state = models.BooleanField(verbose_name="Is Order Closed ?", default=False,blank=True,null=True)
-    
-    Buyer = models.CharField(max_length=500, verbose_name="Buyer Name",blank=True,null=True)
-    BuyerCountry = models.CharField(max_length=100,verbose_name="Buyer Country", blank=True, null=True)
-    BuyerRegion = models.CharField(max_length=100, verbose_name="Buyer Region", blank=True, null=True)
-    BuyerDistrict = models.CharField(max_length=100, verbose_name="Buyer District", blank=True, null=True)
-    BuyerWard = models.CharField(max_length=100, verbose_name="Buyer Ward", blank=True, null=True)
-    BuyerMobileNumber = models.IntegerField(verbose_name="Buyer Mobile Number", blank=True, null=True)
-    #TelNumber = models.IntegerField(verbose_name="Telephone Number", blank=True, null=True)
-
-    BuyerUsername = models.CharField(max_length=200,verbose_name="Buyer Username", blank=True, null=True)
-    BuyerEmail = models.CharField(max_length=200,verbose_name="Buyer Email", blank=True, null=True)
-
-    BuyerLocation = models.CharField(max_length=100, verbose_name="Buyer Physical Location", blank=True, null=True)
-
-    
-    FarmerFullName = models.CharField(max_length=500, verbose_name="Farmer Name",blank=True,null=True)
-    FarmerRegNo = models.CharField(max_length=500, verbose_name="Farmer Reg No",blank=True,null=True)
-    FarmerCountry = models.CharField(max_length=100,verbose_name="Farmer Country", blank=True, null=True)
-    FarmerRegion = models.CharField(max_length=100, verbose_name="Farmer Region", blank=True, null=True)
-    FarmerDistrict = models.CharField(max_length=100, verbose_name="Farmer District", blank=True, null=True)
-    FarmerWard = models.CharField(max_length=100, verbose_name="Farmer Ward", blank=True, null=True)
-    FarmerGender = models.CharField(max_length=6, verbose_name="Farmer Gender", blank=True, null=True)
-    FarmerMobileNumber = models.IntegerField(verbose_name="Farmer Mobile Number", blank=True, null=True)
-    FarmerTelNumber = models.IntegerField(verbose_name="Farmer Telephone Number", blank=True, null=True)
-    FarmerUsername = models.CharField(max_length=200,verbose_name="Farmer Username", blank=True, null=True)
-    FarmerEmail = models.CharField(max_length=200,verbose_name="Farmer Email", blank=True, null=True)
-
-    StocksCollectionCenterName = models.CharField(max_length=500, verbose_name="Stocks Collection Centre Name",blank=True,null=True)
-    StocksCollectionCenterLocation = models.CharField(max_length=500, verbose_name="Stocks Collection Centre Location",blank=True,null=True)
-
-    # table_number = models.CharField(max_length=500, verbose_name="Table Number",blank=True,null=True)
-
-    order_status = models.BooleanField(verbose_name="Status", default=False,blank=True,null=True)
-    created = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = "StocksCollection Orders"
-
-    def __str__(self):
-        return f"Order {self.id} by {self.user.username}"
-
-
-class StocksCollectionOrderItems(models.Model):
-    order = models.ForeignKey(StocksCollectionOrder, on_delete=models.CASCADE) 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    product = models.ForeignKey(StocksCollection,on_delete=models.CASCADE)
-    price = models.FloatField(default=0)
-    # Customer = models.ForeignKey(StocksCollectionCustomers,on_delete=models.CASCADE,blank=True,null=True)
-    order_status = models.BooleanField(verbose_name="Status", default=False,blank=True,null=True)
-    quantity = models.IntegerField(default=1)
-    # table = models.ForeignKey(StocksCollectionTables,on_delete=models.CASCADE,blank=True,null=True)
-    Created = models.DateTimeField(auto_now_add=True)
-    Updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "StocksCollection Orders Items"
-
-    def __str__(self):
-        return f" {self.product.CropType.Crops} " 
-
-
-hizo ndo codes zangu, sasa nilikuwa nataka user akishachagua bidhaa then akamake order basi uende kwenye model ya StocksCollectionOrders ukajaze hizi field automatically;
-field ya Buyer iwe ndo jina la yule user aliyerequest kumake order.
-field ya BuyerCountry iende kwenye model ya Buyers ikafilte huyo user aliyemake order pamoja na taarifa zake zingine then ikakopi kwenye hii model ya StocksCollectionOrders kwenye field zote zenye neno Buyer pamoja na iyo ya BuyerCountry.
-field ya FarmerFullName iende kwenye model ya StocksCollection ambayo inahifadhi bidhaa zote ikakopi field ya full_name na field zingine zenye neno Farmer ikakopi kwenye model hiihii ya StocksCollection corresponding fields.
-pia fields za StocksCollectionCenterName na StocksCollectionCenterLocation zikakopi pia kwenye model hiihii ya StocksCollection kwa kubase kwenye field ya 'CenterName'
-
-
-then mwisho nataka baada ya order kuwa successfully place nenda kwenye model ya Transporters then loop all transporters then tuma email kwa hao transporters wote, ikisema 'Order imewekwa kikamilifu tarehe fulani muda saa fulani na Buyer fulani anayeishi sehemu fulani na bidhaa zipo collection centre fulani iliyopo mahali fulani. Bidhaa alizoorder ni hizi hapa:'
-
-so hilo ndo tatizo langu naomba a full working codes based on my explanations.
-
-my expo react native codes are;
-
-
-
-const [modalVisible, setModalVisible] = useState(false);
-const [cart, setCart] = useState([]);
-const [userToken, setUserToken] = useState('');
-const [shouldReload, setShouldReload] = useState(false);
-const [userData, setUserData] = useState({});
-
-const [selectedProduct, setSelectedProduct] = useState(null);
-const [quantity, setQuantity] = useState('');
-const [isPending, setPending] = useState(true);
-
-
-useEffect(() => {
-
-   
-    checkLoggedIn();
-    // Fetch cart items only if the user is authenticated
-    if (userToken) {
-      fetchCartItems();
-    }
-
-  }, [userToken]);
-
-const checkLoggedIn = async () => {
-const token = await AsyncStorage.getItem('userToken');
-setUserToken(token);
- 
-};
-
-
-
-
-const fetchCartItems = async () => {
-
-  setPending(true);
-  try {
-    const response = await axios.get(
-      EndPoint + '/StocksCollectionCart/',
-      {
-        headers: {
-          Authorization: `Token ${userToken}`,
-        },
-      }
-    );
-
-    // Check if the response data is an empty array (cart is empty)
-    if (Array.isArray(response.data) && response.data.length === 0) {
-      // Handle the case when the cart is empty here
-      setPending(false);
-      setCart([]); // Set cart to an empty array
-    } else {
-      // Cart is not empty, update the cart state with the data
-      setPending(false);
-      setCart(response.data);
-       
-      // Set isOrderButtonVisible to true after adding an item to the cart
-     // Check if the displayedItemsCount is greater than 1 and show the order button
-   
-     // setIsOrderButtonVisible(true);
-    
-
-
-    }
-  } catch (error) {
-    //console.error('Error fetching cart items:', error);
-    setPending(false);
-    showAlertFunction("Error fetching cart items");
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-const removeCartItem = (cartId) => {
-  setPending(true);
-
-   //navigation.replace('Restaurant Products', { id });
-  // Make an API request to delete the item from the cart
-  const apiUrl = `${EndPoint}/StocksCollectionDeleteCartItem/?cartId=${cartId}`;
-  // console.log("URL",apiUrl);
-  
-  axios
-    .delete(apiUrl, {
-      headers: {
-        Authorization: `Token ${userToken}`,
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => {
-      if (response.status === 204) {
-        // Item removed successfully, update the cartItems state
-        setCart(cart.filter((item) => item.id !== cartId));
-
-        setPending(false);
-         //setIsOrderButtonVisible(false);
-         //Alert.alert('item is removed successfully from your cart');
-         showAlertFunction("item is removed successfully from your cart");
-
-         // navigation.replace('Restaurant Products');  
-
-           // Decrement the displayedItemsCount
-     // setDisplayedItemsCount((prevCount) => prevCount - 1);
-
-      // Check if the displayedItemsCount is less than or equal to 1 and hide the order button
-       // Check if the displayedItemsCount is less than or equal to 1 and hide the order button
-    //     if (displayedItemsCount < 1) {
-    //   setIsOrderButtonVisible(false);
-    // }
-
-
-      } 
-      else {
-        setPending(false);
-        // Handle the error if the item couldn't be removed
-        
-        //Alert.alert('Error', 'Failed to remove item from cart');
-        showAlertFunction("Failed to remove item from a cart");
-      }
-    })
-    .catch((error) => {
-     setPending(false);
-      // Handle the error here, for example, show a user-friendly error message
-      //Alert.alert('Error', 'Failed to remove item from cart');
-      showAlertFunction("Failed to remove item from cart");
-    });
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const formatToThreeDigits = (number) => {
-  if (number !== null) {
-    return number.toLocaleString('en-US', {
-      minimumFractionDigits: 0, // Ensure two decimal places
-      maximumFractionDigits: 2, // Limit to two decimal places
-      minimumIntegerDigits: 1, // Ensure at least one integer digit
-    });
-  }
-  return null;
-};
-
-
-const calculateTotalPrice = () => {
-  let total = 0;
-  cart.forEach((item) => {
-    total += item.price;
-  });
-  return total;
-};
-
-const totalCartPrice = calculateTotalPrice();
-
-
-
-
-
-
-
-
-
-
-const makeOrder = async () => {
-
- setPending(true);
-  //navigation.replace('Restaurant Products');
-  //call the print Receipt function
-    // navigation.replace('Restaurant Products', { id });
- 
-  //setIsOrderButtonVisible(false);
-  try {
-    const response = await axios.post(
-      EndPoint + '/StocksCollectionOrder/',
-      { 
-        total_price: totalCartPrice,
-        //table: selectedTable, // Include the selected table
-        // CustomerFullName: CustomerFullName,
-        // PhoneNumber: PhoneNumber,
-        // CustomerAddress: CustomerAddress,
-        //room: selectedRoom,
-        //Customer: selectedCustomer,
-         },
-
-      {
-        headers: {
-          Authorization: `Token ${userToken}`,
-        },
-      }
-    );
-    
-
-  //setModalVisibleMakeOrder(false);
-    // Clear the cart items from the local state
-    setCart([]);
-
-    // Set isOrderPlaced to true to hide the "Make Order" button and total price text
-     // Set isOrderButtonVisible to false after placing the order
-    
-    //print();
-     //printToFile();
-
-    // After a successful order, update your UI or show a confirmation message
-    setPending(false);
-    //Alert.alert('Success', 'Order placed successfully!');
-    showAlertFunction("Order placed successfully!");
-
-
-    // Optionally, you can navigate to a screen to display the PDF or HTML table.
-    // For example, you can set a state variable to control the visibility of a modal.
-    //setModalVisibleReceipt(true);
-
-
-  } catch (error) {
-    setPending(false);
-    //console.error('Error creating order:', error);
-    showAlertFunction("Error creating order!");
-
-  }
-};
+        return self.email
 
